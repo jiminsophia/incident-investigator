@@ -1,0 +1,21 @@
+[
+  {
+    "service": "checkout-api",
+    "baseline_p95_ms": 340,
+    "current_p95_ms": 1920,
+    "error_rate_pct": 7.8
+  },
+  {
+    "service": "payment-service",
+    "baseline_p95_ms": 220,
+    "current_p95_ms": 1410,
+    "error_rate_pct": 12.1
+  },
+  {
+    "service": "cart-service",
+    "baseline_p95_ms": 180,
+    "current_p95_ms": 490,
+    "error_rate_pct": 1.9
+  }
+]
+

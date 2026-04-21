@@ -1,0 +1,15 @@
+[
+  {
+    "flow": "search_results_to_click",
+    "baseline_conversion_rate": 0.38,
+    "current_conversion_rate": 0.19,
+    "dropoff_rate_delta": 0.19
+  },
+  {
+    "flow": "search_to_add_to_cart",
+    "baseline_conversion_rate": 0.14,
+    "current_conversion_rate": 0.08,
+    "dropoff_rate_delta": 0.06
+  }
+]
+

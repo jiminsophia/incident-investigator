@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Payment Redis session config",
+    "location": "services/payment/config/redis.yaml",
+    "summary": "Redis pool size, command timeout, and retry settings for payment session reservations.",
+    "keywords": ["payment-service", "redis-cache", "reserve_payment_session", "timeout"]
+  },
+  {
+    "title": "Checkout API timeout policy",
+    "location": "services/checkout-api/config/timeouts.yaml",
+    "summary": "Gateway timeout budget and retry behavior for payment-service requests.",
+    "keywords": ["checkout-api", "payment-service", "deadline", "timeout"]
+  },
+  {
+    "title": "Feature flag rollout for payment retry path",
+    "location": "ops/flags/payment_retry_experiment.json",
+    "summary": "Rollout percentage and fallback policy for a payment retry experiment enabled shortly before the incident.",
+    "keywords": ["payment-service", "feature_flag", "authorize_payment", "retry"]
+  },
+  {
+    "title": "Checkout tracing dashboard notes",
+    "location": "docs/runbooks/checkout-latency.md",
+    "summary": "Runbook for investigating checkout latency, Redis saturation, and downstream payment failures.",
+    "keywords": ["checkout-api", "redis-cache", "runbook", "latency"]
+  }
+]
+

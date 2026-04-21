@@ -1,0 +1,23 @@
+[
+  {
+    "trace_id": "trace-101",
+    "window": "09:30-09:45 UTC",
+    "duration_ms": 1760,
+    "spans": [
+      {"service": "search-api", "name": "GET /search", "duration_ms": 1760},
+      {"service": "ranking-service", "name": "rerank_top_k", "duration_ms": 1280},
+      {"service": "model-gateway", "name": "fetch_embedding_vectors", "duration_ms": 1120}
+    ]
+  },
+  {
+    "trace_id": "trace-102",
+    "window": "09:30-09:45 UTC",
+    "duration_ms": 1680,
+    "spans": [
+      {"service": "search-api", "name": "GET /search", "duration_ms": 1680},
+      {"service": "ranking-service", "name": "score_candidates", "duration_ms": 1190},
+      {"service": "model-gateway", "name": "fetch_embedding_vectors", "duration_ms": 980}
+    ]
+  }
+]
+

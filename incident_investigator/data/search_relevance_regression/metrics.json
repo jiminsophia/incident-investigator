@@ -1,0 +1,21 @@
+[
+  {
+    "service": "search-api",
+    "baseline_p95_ms": 210,
+    "current_p95_ms": 1220,
+    "error_rate_pct": 8.2
+  },
+  {
+    "service": "ranking-service",
+    "baseline_p95_ms": 140,
+    "current_p95_ms": 940,
+    "error_rate_pct": 6.4
+  },
+  {
+    "service": "frontend-web",
+    "baseline_p95_ms": 110,
+    "current_p95_ms": 260,
+    "error_rate_pct": 0.8
+  }
+]
+

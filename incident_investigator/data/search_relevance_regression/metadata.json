@@ -1,0 +1,6 @@
+{
+  "title": "Search API regression and user abandonment spike",
+  "summary": "After a rollout around 09:30, search errors and latency increased, while successful search-to-click conversion dropped materially.",
+  "severity": "SEV-2"
+}
+
