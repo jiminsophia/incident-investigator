@@ -105,11 +105,12 @@ def render_scenario_preview(bundle: dict) -> None:
     st.write(overview["title"])
     st.caption(overview["summary"])
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Logs", len(bundle["logs"]))
-    c2.metric("Metrics series", len(bundle["metrics"]))
-    c3.metric("Traces", len(bundle["traces"]))
-    c4.metric("User events", len(bundle["user_events"]))
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("Raw events", len(bundle.get("raw_events", [])))
+    c2.metric("Baseline events", len(bundle.get("baseline_events", [])))
+    c3.metric("Derived logs", len(bundle["logs"]))
+    c4.metric("Traces", len(bundle["traces"]))
+    c5.metric("Severity", bundle.get("incident_severity", overview["severity"]))
 
 
 def render_replay_stage(stage: dict) -> None:

@@ -16,10 +16,22 @@ class InvestigationPlanner:
     def choose_next_step(
         self, state: ExecutionState, registry: SkillRegistry
     ) -> PlanStep | None:
+        if not state.has("observability_reduced"):
+            return PlanStep(
+                skill_name="Observability Reduction",
+                reason="We need to derive logs, metrics, traces, and journey summaries from raw events before deeper investigation.",
+            )
+
         if not state.has("anomalies"):
             return PlanStep(
                 skill_name="Signal Monitor",
                 reason="We need a baseline read across metrics, logs, and user impact before planning deeper steps.",
+            )
+
+        if not state.has("focused_window"):
+            return PlanStep(
+                skill_name="Focus Window Refinement",
+                reason="We should narrow the investigation to the most incident-dense raw-event window before tracing deeper.",
             )
 
         if not state.has("trace_summary") and state.failure_count("Trace Investigation") < (

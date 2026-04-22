@@ -1,6 +1,0 @@
-{
-  "title": "Checkout latency and payment failure spike",
-  "summary": "During the 14:05-14:20 window, checkout latency surged, payment retries increased, and checkout conversion fell sharply.",
-  "severity": "SEV-1"
-}
-

@@ -8,6 +8,7 @@ from incident_investigator.tools.config_retriever import retrieve_relevant_artif
 from incident_investigator.tools.log_parser import summarize_logs
 from incident_investigator.tools.metrics import summarize_metrics
 from incident_investigator.tools.reporting import format_agent_detail
+from incident_investigator.tools.severity import calculate_incident_severity
 from incident_investigator.tools.traces import summarize_traces
 from incident_investigator.tools.user_behavior import summarize_user_behavior
 
@@ -20,12 +21,20 @@ class MonitorAgent(BaseAgent):
         metric_summary = summarize_metrics(context["metrics"])
         log_summary = summarize_logs(context["logs"])
         user_summary = summarize_user_behavior(context["user_events"])
-        anomalies = detect_anomalies(metric_summary, log_summary, user_summary)
+        severity = calculate_incident_severity(metric_summary, log_summary, user_summary)
+        severity_summary = {
+            "severity": severity["incident_severity"],
+            "incident_score": severity["incident_score"],
+            "affected_services": metric_summary.get("degraded_services", []),
+            "summary": severity["summary"],
+        }
+        anomalies = detect_anomalies(metric_summary, log_summary, user_summary, severity_summary)
 
         findings = {
             "metric_summary": metric_summary,
             "log_summary": log_summary,
             "user_summary": user_summary,
+            "severity_summary": severity_summary,
             "anomalies": anomalies,
         }
         detail = format_agent_detail(

@@ -6,18 +6,95 @@ from incident_investigator.llm.prompts import build_action_prompt, build_hypothe
 from incident_investigator.skills.base import BaseSkill, SkillResult, SkillSpec
 from incident_investigator.tools.anomaly_detector import detect_anomalies
 from incident_investigator.tools.config_retriever import retrieve_relevant_artifacts
+from incident_investigator.tools.event_processing import (
+    calculate_incident_severity as calculate_event_severity,
+    derive_log_records,
+    derive_service_metrics,
+    derive_user_journeys,
+    select_focus_window,
+    summarize_request_paths,
+)
 from incident_investigator.tools.log_parser import summarize_logs
 from incident_investigator.tools.metrics import summarize_metrics
+from incident_investigator.tools.observability import reduce_observability
 from incident_investigator.tools.reporting import format_agent_detail
+from incident_investigator.tools.severity import calculate_incident_severity
 from incident_investigator.tools.traces import summarize_traces
 from incident_investigator.tools.user_behavior import summarize_user_behavior
+
+
+def _active_metric_summary(context: dict) -> dict:
+    return context.get("focused_metric_summary", context.get("metric_summary", {}))
+
+
+def _active_log_summary(context: dict) -> dict:
+    return context.get("focused_log_summary", context.get("log_summary", {}))
+
+
+def _active_user_summary(context: dict) -> dict:
+    return context.get("focused_user_summary", context.get("user_summary", {}))
+
+
+def _active_request_path_summary(context: dict) -> dict:
+    return context.get("focused_request_path_summary", context.get("request_path_summary", {}))
+
+
+def _active_severity_summary(context: dict) -> dict:
+    return context.get("focused_severity_summary", context.get("severity_summary", {}))
+
+
+class ObservabilityReductionSkill(BaseSkill):
+    spec = SkillSpec(
+        name="Observability Reduction",
+        description="Reduce rough raw events into service metrics, derived logs, and user-journey summaries.",
+        required_keys=("raw_events", "baseline_events", "filters"),
+        produced_keys=(
+            "observability_reduced",
+            "logs",
+            "metrics",
+            "user_events",
+            "reduction_summary",
+            "request_path_summary",
+            "severity_summary",
+            "incident_score",
+            "incident_severity",
+            "severity_hint",
+        ),
+    )
+
+    def run(self, context: dict) -> SkillResult:
+        reduced = reduce_observability(
+            context["raw_events"],
+            context["filters"],
+            baseline_events=context.get("baseline_events", []),
+        )
+        detail = format_agent_detail(
+            "Reduce raw observability events",
+            [
+                f"Reduced {len(context['raw_events'])} in-window events against {len(context.get('baseline_events', []))} baseline events.",
+                f"Derived {len(reduced['metrics'])} service metrics, {len(reduced['logs'])} log records, and {len(reduced['user_events'])} journey summaries.",
+                reduced["request_path_summary"]["path_summary"],
+                reduced["severity_summary"]["summary"],
+            ],
+        )
+        return SkillResult(
+            skill=self.spec.name,
+            success=True,
+            summary="Raw events reduced into investigation signals",
+            findings={
+                **reduced,
+                "observability_reduced": True,
+            },
+            confidence=0.86,
+            detail=detail,
+        )
 
 
 class SignalMonitorSkill(BaseSkill):
     spec = SkillSpec(
         name="Signal Monitor",
-        description="Summarize logs, metrics, user behavior, and detect anomalies.",
-        required_keys=("metrics", "logs", "user_events"),
+        description="Summarize derived observability signals and detect anomalies.",
+        required_keys=("metrics", "logs", "user_events", "severity_summary"),
         produced_keys=("metric_summary", "log_summary", "user_summary", "anomalies"),
     )
 
@@ -25,9 +102,17 @@ class SignalMonitorSkill(BaseSkill):
         metric_summary = summarize_metrics(context["metrics"])
         log_summary = summarize_logs(context["logs"])
         user_summary = summarize_user_behavior(context["user_events"])
-        anomalies = detect_anomalies(metric_summary, log_summary, user_summary)
+        severity = calculate_incident_severity(metric_summary, log_summary, user_summary)
+        merged_severity = {
+            **context["severity_summary"],
+            "incident_score": severity["incident_score"],
+            "severity": severity["incident_severity"],
+            "severity_hint": severity["severity_hint"],
+            "summary": severity["summary"],
+        }
+        anomalies = detect_anomalies(metric_summary, log_summary, user_summary, merged_severity)
 
-        confidence = min(1.0, 0.25 + 0.2 * len(anomalies))
+        confidence = min(0.95, 0.35 + (severity["incident_score"] / 100))
         detail = format_agent_detail(
             "Detect operational anomalies",
             [
@@ -35,6 +120,7 @@ class SignalMonitorSkill(BaseSkill):
                 f"Peak latency service: {metric_summary['highest_latency_service']}.",
                 f"Error hotspot: {log_summary['top_error_component']}.",
                 f"User impact: {user_summary['dropoff_summary']}",
+                f"Severity now computes to {merged_severity['severity']} with score {merged_severity['incident_score']}.",
             ],
         )
         return SkillResult(
@@ -45,7 +131,82 @@ class SignalMonitorSkill(BaseSkill):
                 "metric_summary": metric_summary,
                 "log_summary": log_summary,
                 "user_summary": user_summary,
+                "severity_summary": merged_severity,
+                "incident_score": merged_severity["incident_score"],
+                "incident_severity": merged_severity["severity"],
+                "severity_hint": merged_severity["severity_hint"],
                 "anomalies": anomalies,
+            },
+            confidence=confidence,
+            detail=detail,
+        )
+
+
+class FocusWindowRefinementSkill(BaseSkill):
+    spec = SkillSpec(
+        name="Focus Window Refinement",
+        description="Pick the most incident-dense time slice and recompute focused summaries for it.",
+        required_keys=("raw_events", "baseline_events"),
+        produced_keys=(
+            "focused_window",
+            "focused_logs",
+            "focused_metrics",
+            "focused_user_events",
+            "focused_metric_summary",
+            "focused_log_summary",
+            "focused_user_summary",
+            "focused_request_path_summary",
+            "focused_severity_summary",
+        ),
+    )
+
+    def run(self, context: dict) -> SkillResult:
+        focused_window = select_focus_window(
+            context["raw_events"],
+            context.get("baseline_events", []),
+        )
+        focused_events = focused_window["events"]
+        focused_metrics = derive_service_metrics(focused_events, context.get("baseline_events", []))
+        focused_logs = derive_log_records(focused_events, context.get("baseline_events", []))
+        focused_user_events = derive_user_journeys(focused_events, context.get("baseline_events", []))
+        focused_metric_summary = summarize_metrics(focused_metrics)
+        focused_log_summary = summarize_logs(focused_logs)
+        focused_user_summary = summarize_user_behavior(focused_user_events)
+        focused_request_path_summary = summarize_request_paths(focused_events)
+        focused_severity_summary = calculate_event_severity(
+            focused_metrics,
+            focused_user_events,
+            focused_logs,
+        )
+
+        confidence = 0.25 if not focused_events else min(0.9, 0.4 + (focused_window["incident_score"] / 120))
+        detail = format_agent_detail(
+            "Refine the incident focus window",
+            [
+                f"Selected focused window {focused_window['label']} with incident score {focused_window['incident_score']}.",
+                f"Focused event count: {len(focused_events)}.",
+                focused_request_path_summary["path_summary"],
+                focused_severity_summary["summary"],
+            ],
+        )
+        return SkillResult(
+            skill=self.spec.name,
+            success=True,
+            summary="Focused window recomputed",
+            findings={
+                "focused_window": {
+                    key: value
+                    for key, value in focused_window.items()
+                    if key != "events"
+                },
+                "focused_logs": focused_logs,
+                "focused_metrics": focused_metrics,
+                "focused_user_events": focused_user_events,
+                "focused_metric_summary": focused_metric_summary,
+                "focused_log_summary": focused_log_summary,
+                "focused_user_summary": focused_user_summary,
+                "focused_request_path_summary": focused_request_path_summary,
+                "focused_severity_summary": focused_severity_summary,
             },
             confidence=confidence,
             detail=detail,
@@ -55,14 +216,19 @@ class SignalMonitorSkill(BaseSkill):
 class TraceInvestigationSkill(BaseSkill):
     spec = SkillSpec(
         name="Trace Investigation",
-        description="Inspect slow traces to identify the primary incident window.",
+        description="Inspect slow traces to identify the primary incident window and hot services.",
         required_keys=("traces",),
         produced_keys=("trace_summary",),
         max_retries=2,
     )
 
     def run(self, context: dict) -> SkillResult:
-        trace_summary = summarize_traces(context["traces"])
+        focused_window = context.get("focused_window", {})
+        trace_summary = summarize_traces(
+            context["traces"],
+            start=focused_window.get("start"),
+            end=focused_window.get("end"),
+        )
         hot_services = trace_summary["hot_services"]
         confidence = 0.2 if not hot_services else min(0.85, 0.35 + 0.15 * len(hot_services))
 
@@ -98,10 +264,12 @@ class ArtifactAnalysisSkill(BaseSkill):
             "trace_summary",
             {"suspicious_span_names": [], "hot_services": [], "primary_window": "unknown"},
         )
+        metric_summary = _active_metric_summary(context)
+        log_summary = _active_log_summary(context)
         relevant_artifacts = retrieve_relevant_artifacts(
             context["artifacts"],
-            context["log_summary"]["top_error_component"],
-            context["metric_summary"]["highest_latency_service"],
+            log_summary.get("top_error_component", "unknown"),
+            metric_summary.get("highest_latency_service", "unknown"),
             trace_summary["suspicious_span_names"],
         )
         confidence = 0.3 if not relevant_artifacts else min(0.9, 0.35 + 0.1 * len(relevant_artifacts))
@@ -125,7 +293,7 @@ class ArtifactAnalysisSkill(BaseSkill):
 class ComponentCorrelationSkill(BaseSkill):
     spec = SkillSpec(
         name="Component Correlation",
-        description="Correlate suspicious components across signals and traces.",
+        description="Correlate suspicious components across reduced signals and traces.",
         required_keys=("metric_summary", "log_summary"),
         produced_keys=("suspicious_components", "primary_window"),
     )
@@ -135,21 +303,30 @@ class ComponentCorrelationSkill(BaseSkill):
             "trace_summary",
             {"hot_services": [], "primary_window": "not enough trace data yet"},
         )
+        metric_summary = _active_metric_summary(context)
+        log_summary = _active_log_summary(context)
+        request_path_summary = _active_request_path_summary(context)
         suspicious_components = [
-            context["log_summary"]["top_error_component"],
-            context["metric_summary"]["highest_latency_service"],
+            log_summary.get("top_error_component"),
+            metric_summary.get("highest_latency_service"),
+            metric_summary.get("highest_error_service"),
             *trace_summary["hot_services"],
         ]
         component_counts = Counter(component for component in suspicious_components if component)
+        primary_window = trace_summary["primary_window"]
+        if primary_window == "not enough trace data yet":
+            primary_window = context.get("focused_window", {}).get("label", primary_window)
         findings = {
             "suspicious_components": component_counts.most_common(4),
-            "primary_window": trace_summary["primary_window"],
+            "primary_window": primary_window,
+            "failing_path": request_path_summary.get("failing_path", "unknown"),
         }
-        confidence = 0.25 if not findings["suspicious_components"] else 0.65
+        confidence = 0.25 if not findings["suspicious_components"] else 0.7
         detail = format_agent_detail(
             "Correlate evidence across modules",
             [
-                f"Focused on incident window {trace_summary['primary_window']}.",
+                f"Focused on incident window {primary_window}.",
+                f"Request path under pressure: {request_path_summary.get('failing_path', 'unknown')}.",
                 "Cross-signal hotspots were "
                 f"{', '.join(name for name, _ in findings['suspicious_components']) or 'not clear yet'}.",
             ],
@@ -177,18 +354,24 @@ class HypothesisGenerationSkill(BaseSkill):
         if llm_result is not None and llm_result.success:
             return llm_result
 
+        metric_summary = _active_metric_summary(context)
+        log_summary = _active_log_summary(context)
+        user_summary = _active_user_summary(context)
+        request_path_summary = _active_request_path_summary(context)
+        severity_summary = _active_severity_summary(context)
         anomalies = context["anomalies"]
         trace_summary = context.get(
             "trace_summary",
             {
                 "trace_summary": "Trace evidence is still thin.",
-                "primary_window": "not enough trace data yet",
+                "primary_window": context.get("focused_window", {}).get("label", "not enough trace data yet"),
             },
         )
         relevant_artifacts = context.get("relevant_artifacts", [])
-        top_error = context["log_summary"]["top_error_component"]
-        top_latency = context["metric_summary"]["highest_latency_service"]
+        top_error = log_summary.get("top_error_component", "unknown")
+        top_latency = metric_summary.get("highest_latency_service", "unknown")
         artifact_titles = [item["title"] for item in relevant_artifacts]
+        failing_path = request_path_summary.get("failing_path", "unknown")
 
         if not anomalies:
             hypotheses = [
@@ -196,62 +379,55 @@ class HypothesisGenerationSkill(BaseSkill):
                     "title": "Insufficient evidence for a confirmed incident",
                     "confidence": "Low",
                     "rationale": (
-                        "Latency, logs, and user behavior are still close to baseline, so the "
-                        "system is monitoring for stronger cross-signal confirmation."
+                        "Latency, failures, and user impact remain too close to baseline to support a confident incident claim."
                     ),
                     "evidence": [
-                        context["metric_summary"]["latency_summary"],
-                        context["log_summary"]["error_summary"],
-                        context["user_summary"]["dropoff_summary"],
+                        metric_summary.get("latency_summary", "No latency evidence available."),
+                        log_summary.get("error_summary", "No log evidence available."),
+                        user_summary.get("dropoff_summary", "No user impact visible yet."),
                     ],
                 }
             ]
             confidence = 0.2
             detail_lines = [
                 "Held off on a strong root-cause claim because the signal is still weak.",
-                "Waiting for stronger alignment across metrics, errors, traces, and user impact.",
+                "Waiting for stronger alignment across latency, failures, traces, and user impact.",
             ]
         else:
             has_trace_support = bool(trace_summary.get("hot_services"))
             has_artifact_support = bool(relevant_artifacts)
             hypotheses = [
                 {
-                    "title": f"{top_latency} dependency saturation caused cascading latency",
+                    "title": f"{top_latency} dependency saturation caused cascading latency on {failing_path}",
                     "confidence": "High" if has_trace_support else "Medium",
                     "rationale": (
-                        f"{top_latency} shows the highest latency spike, traces indicate queueing, "
-                        "and logs show timeout symptoms during the same time window."
-                        if has_trace_support
-                        else f"{top_latency} shows the highest latency spike and logs show timeout "
-                        "symptoms, but trace confirmation is still limited."
+                        f"{top_latency} shows the highest latency spike, {top_error} dominates failures, "
+                        f"and the degraded request path is {failing_path}."
                     ),
                     "evidence": [
-                        context["metric_summary"]["latency_summary"],
+                        metric_summary["latency_summary"],
                         trace_summary["trace_summary"],
-                        f"Related artifacts: {', '.join(artifact_titles[:2]) or 'none'}",
+                        severity_summary.get("summary", "Severity summary unavailable."),
                     ],
                 },
                 {
-                    "title": f"{top_error} rollout/config change introduced request failures",
+                    "title": f"{top_error} rollout or timeout policy change introduced request failures",
                     "confidence": "Medium" if has_artifact_support else "Low",
                     "rationale": (
-                        f"{top_error} dominates the error logs and the retrieved artifacts include "
-                        "recently changed rollout or timeout settings connected to the incident path."
-                        if has_artifact_support
-                        else f"{top_error} dominates the error logs, but artifact matches are still too thin "
-                        "to strongly confirm a rollout or configuration issue."
+                        f"{top_error} dominates the error logs and the retrieved artifacts align with the failing path "
+                        f"{failing_path} during {trace_summary['primary_window']}."
                     ),
                     "evidence": [
-                        context["log_summary"]["error_summary"],
+                        log_summary["error_summary"],
                         f"Primary incident window: {context.get('primary_window', trace_summary['primary_window'])}",
-                        f"Artifact matches: {', '.join(artifact_titles[2:4]) or 'limited matches'}",
+                        f"Artifact matches: {', '.join(artifact_titles[:3]) or 'limited matches'}",
                     ],
                 },
             ]
             confidence = 0.55 + (0.15 if has_trace_support else 0.0) + (0.1 if has_artifact_support else 0.0)
             detail_lines = [
                 f"Ranked {len(hypotheses)} root-cause hypotheses.",
-                f"Top hypothesis links {top_latency} latency with downstream timeout behavior.",
+                f"Top hypothesis links {top_latency} latency with downstream timeout behavior on {failing_path}.",
             ]
 
         detail = format_agent_detail("Rank likely explanations", detail_lines)
@@ -273,7 +449,7 @@ class HypothesisGenerationSkill(BaseSkill):
             "You are an incident investigation analyst. Return only valid JSON with this shape: "
             '{"hypotheses":[{"title":str,"confidence":"Low|Medium|High","rationale":str,"evidence":[str]}],'
             '"summary":str,"detail_points":[str],"confidence_score":number}. '
-            "Use only the provided evidence. Do not invent unavailable logs, traces, or artifacts."
+            "Use only the provided evidence. Do not invent unavailable logs, traces, artifacts, or degraded paths."
         )
         try:
             response = llm.generate_json(
@@ -327,16 +503,22 @@ class EvidenceReviewSkill(BaseSkill):
         hypotheses = context["hypotheses"]
         relevant_artifacts = context.get("relevant_artifacts", [])
         trace_summary = context.get("trace_summary", {"slow_trace_count": 0})
+        focused_window = context.get("focused_window", {})
+        severity_summary = _active_severity_summary(context)
 
         evidence_gaps = []
+        if not focused_window:
+            evidence_gaps.append("Focused incident window has not been refined yet.")
         if trace_summary.get("slow_trace_count", 0) == 0:
             evidence_gaps.append("Trace evidence is still limited.")
         if not relevant_artifacts:
             evidence_gaps.append("Matched code/config artifacts are limited.")
         if hypotheses and hypotheses[0]["confidence"] == "Low":
             evidence_gaps.append("Top hypothesis confidence is still low.")
+        if severity_summary.get("severity") == "Watch":
+            evidence_gaps.append("Severity remains below incident-confirmation threshold.")
 
-        investigation_confidence = max(0.2, 0.8 - 0.15 * len(evidence_gaps))
+        investigation_confidence = max(0.2, 0.85 - 0.12 * len(evidence_gaps))
         detail = format_agent_detail(
             "Review evidence completeness",
             [
@@ -375,10 +557,12 @@ class ActionPlanningSkill(BaseSkill):
 
         hypotheses = context["hypotheses"]
         artifacts = context.get("relevant_artifacts", [])
+        request_path_summary = _active_request_path_summary(context)
+        focused_window = context.get("focused_window", {})
 
         if hypotheses[0]["confidence"] == "Low":
             actions = [
-                "Keep the incident in watch mode and continue collecting the next few minutes of logs, traces, and user metrics.",
+                "Keep the incident in watch mode and continue collecting the next few minutes of raw events, traces, and journey outcomes.",
                 "Alert the on-call owner for the suspected service path, but avoid rollback until cross-signal evidence strengthens.",
                 "Prepare the matched runbook and recent rollout/config diffs so responders can move quickly if severity increases.",
             ]
@@ -389,9 +573,9 @@ class ActionPlanningSkill(BaseSkill):
             ]
         else:
             actions = [
-                "Mitigate user impact first: roll back the latest risky config or feature gate on the affected request path.",
+                f"Mitigate user impact first on {request_path_summary.get('primary_entry_point', 'the affected entry point')}: roll back the latest risky config or feature gate.",
                 "Reduce pressure on the hot dependency with cache warming, connection pool checks, or temporary traffic shaping.",
-                "Inspect timeout, retry, and circuit-breaker settings for the impacted service chain during the incident window.",
+                f"Inspect timeout, retry, and circuit-breaker settings for the incident window {focused_window.get('label', 'under review')}.",
                 "Review the matched code/config artifacts and compare against the last known healthy deployment.",
                 "Add a targeted alert that joins latency, timeout errors, and conversion drop for earlier detection next time.",
             ]
@@ -470,7 +654,9 @@ class ActionPlanningSkill(BaseSkill):
 
 def build_default_skills() -> list[BaseSkill]:
     return [
+        ObservabilityReductionSkill(),
         SignalMonitorSkill(),
+        FocusWindowRefinementSkill(),
         TraceInvestigationSkill(),
         ArtifactAnalysisSkill(),
         ComponentCorrelationSkill(),

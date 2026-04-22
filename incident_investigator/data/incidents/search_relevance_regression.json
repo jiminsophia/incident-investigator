@@ -5,10 +5,13 @@
     "severity": "SEV-2"
   },
   "filters": {
-    "start": "2026-04-21T09:30:00Z",
-    "end": "2026-04-21T09:45:00Z",
-    "metric_snapshot_at": "2026-04-21T09:36:30Z",
-    "user_snapshot_at": "2026-04-21T09:36:30Z",
+    "baseline_start": "2026-04-21T09:28:30Z",
+    "baseline_end": "2026-04-21T09:32:30Z",
+    "start": "2026-04-21T09:33:00Z",
+    "end": "2026-04-21T09:36:30Z",
+    "entrypoints": [
+      "/search"
+    ],
     "components": [
       "search-api",
       "ranking-service",

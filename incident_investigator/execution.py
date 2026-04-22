@@ -17,20 +17,11 @@ class ExecutionBackendStatus:
 
 
 class SkillExecutor:
-    backend_name = "native"
-    display_name = "Native Python"
+    backend_name = "nemo_nat"
+    display_name = "NeMo Agent Toolkit"
 
     def execute(self, skill: BaseSkill, context: dict[str, Any]) -> SkillResult:
         raise NotImplementedError
-
-
-class DirectSkillExecutor(SkillExecutor):
-    backend_name = "native"
-    display_name = "Native Python"
-
-    def execute(self, skill: BaseSkill, context: dict[str, Any]) -> SkillResult:
-        return skill.run(context)
-
 
 def skill_result_to_payload(result: SkillResult) -> dict[str, Any]:
     return {
@@ -62,13 +53,6 @@ def skill_result_from_payload(payload: Any, fallback_skill_name: str) -> SkillRe
 
 
 def get_execution_backend_status(name: str) -> ExecutionBackendStatus:
-    if name == "native":
-        return ExecutionBackendStatus(
-            name="native",
-            available=True,
-            detail="Uses the built-in Python skill executor.",
-        )
-
     if name == "nemo_nat":
         if importlib.util.find_spec("nat") is None:
             return ExecutionBackendStatus(
@@ -90,8 +74,6 @@ def get_execution_backend_status(name: str) -> ExecutionBackendStatus:
 
 
 def build_skill_executor(name: str) -> SkillExecutor:
-    if name == "native":
-        return DirectSkillExecutor()
     if name == "nemo_nat":
         status = get_execution_backend_status(name)
         if not status.available:

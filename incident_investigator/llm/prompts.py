@@ -44,10 +44,9 @@ def build_agentic_user_prompt(bundle: dict) -> str:
     payload = {
         "metadata": bundle["metadata"],
         "dataset_sizes": {
-            "logs": len(bundle.get("logs", [])),
-            "metrics": len(bundle.get("metrics", [])),
+            "raw_events": len(bundle.get("raw_events", [])),
+            "baseline_events": len(bundle.get("baseline_events", [])),
             "traces": len(bundle.get("traces", [])),
-            "user_events": len(bundle.get("user_events", [])),
             "artifacts": len(bundle.get("artifacts", [])),
         },
         "replay_stage": bundle.get("replay_stage"),
@@ -61,10 +60,14 @@ def build_agentic_user_prompt(bundle: dict) -> str:
 def build_hypothesis_prompt(context: dict) -> str:
     payload = {
         "metadata": context["metadata"],
-        "metric_summary": context["metric_summary"],
-        "log_summary": context["log_summary"],
-        "user_summary": context["user_summary"],
+        "incident_severity": context.get("incident_severity"),
+        "metric_summary": context.get("focused_metric_summary", context["metric_summary"]),
+        "log_summary": context.get("focused_log_summary", context["log_summary"]),
+        "user_summary": context.get("focused_user_summary", context["user_summary"]),
+        "request_path_summary": context.get("focused_request_path_summary", context.get("request_path_summary", {})),
+        "severity_summary": context.get("focused_severity_summary", context.get("severity_summary", {})),
         "trace_summary": context.get("trace_summary", {}),
+        "focused_window": context.get("focused_window"),
         "primary_window": context.get("primary_window"),
         "relevant_artifacts": context.get("relevant_artifacts", []),
         "anomalies": context["anomalies"],
@@ -75,9 +78,13 @@ def build_hypothesis_prompt(context: dict) -> str:
 def build_action_prompt(context: dict) -> str:
     payload = {
         "metadata": context["metadata"],
+        "incident_severity": context.get("incident_severity"),
         "hypotheses": context["hypotheses"],
         "evidence_gaps": context.get("evidence_gaps", []),
         "relevant_artifacts": context.get("relevant_artifacts", []),
+        "request_path_summary": context.get("focused_request_path_summary", context.get("request_path_summary", {})),
+        "severity_summary": context.get("focused_severity_summary", context.get("severity_summary", {})),
+        "focused_window": context.get("focused_window"),
         "primary_window": context.get("primary_window"),
     }
     return json.dumps(payload, indent=2)

@@ -12,7 +12,7 @@ class CoordinatorAgent:
     def __init__(
         self,
         llm_config: LLMConfig | None = None,
-        execution_backend: str = "native",
+        execution_backend: str = "nemo_nat",
     ) -> None:
         self.registry = SkillRegistry(build_default_skills())
         self.planner = InvestigationPlanner()
@@ -102,21 +102,29 @@ class CoordinatorAgent:
             ],
         )
         metric_summary = state.context.get(
-            "metric_summary",
-            {"highest_latency_service": "unknown", "latency_summary": "No latency metrics available yet."},
+            "focused_metric_summary",
+            state.context.get(
+                "metric_summary",
+                {"highest_latency_service": "unknown", "latency_summary": "No latency metrics available yet."},
+            ),
+        )
+        severity_summary = state.context.get(
+            "focused_severity_summary",
+            state.context.get("severity_summary", {}),
         )
         primary_window = state.context.get("primary_window") or state.context.get(
             "trace_summary", {}
-        ).get("primary_window", "unknown")
+        ).get("primary_window", state.context.get("focused_window", {}).get("label", "unknown"))
         supporting_evidence = [anomaly["description"] for anomaly in anomalies]
         supporting_evidence.extend(hypotheses[0].get("evidence", []))
         supporting_evidence.extend(state.context.get("evidence_gaps", []))
+        severity = severity_summary.get("severity", state.context.get("incident_severity", metadata["severity"]))
 
         return {
             "anomaly_summary": {
                 "headline": metadata["title"],
                 "summary": metadata["summary"],
-                "severity": metadata["severity"],
+                "severity": severity,
                 "impacted_service": metric_summary["highest_latency_service"],
                 "time_window": primary_window,
             },
@@ -131,16 +139,26 @@ class CoordinatorAgent:
         anomaly_summary = report.setdefault("anomaly_summary", {})
         metadata = state.context["metadata"]
         metric_summary = state.context.get(
-            "metric_summary",
-            {"highest_latency_service": "unknown"},
+            "focused_metric_summary",
+            state.context.get(
+                "metric_summary",
+                {"highest_latency_service": "unknown"},
+            ),
+        )
+        severity_summary = state.context.get(
+            "focused_severity_summary",
+            state.context.get("severity_summary", {}),
         )
         primary_window = state.context.get("primary_window") or state.context.get(
             "trace_summary", {}
-        ).get("primary_window", "unknown")
+        ).get("primary_window", state.context.get("focused_window", {}).get("label", "unknown"))
 
         anomaly_summary.setdefault("headline", metadata["title"])
         anomaly_summary.setdefault("summary", metadata["summary"])
-        anomaly_summary.setdefault("severity", metadata["severity"])
+        anomaly_summary.setdefault(
+            "severity",
+            severity_summary.get("severity", state.context.get("incident_severity", metadata["severity"])),
+        )
         anomaly_summary.setdefault("impacted_service", metric_summary["highest_latency_service"])
         anomaly_summary.setdefault("time_window", primary_window)
 

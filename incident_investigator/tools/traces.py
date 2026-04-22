@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from collections import Counter
 
+from incident_investigator.tools.event_processing import parse_timestamp
 
-def summarize_traces(traces: list[dict]) -> dict:
+
+def summarize_traces(traces: list[dict], start: str | None = None, end: str | None = None) -> dict:
     if not traces:
         return {
             "slow_trace_count": 0,
@@ -11,6 +13,23 @@ def summarize_traces(traces: list[dict]) -> dict:
             "hot_services": [],
             "primary_window": "not enough trace data yet",
             "trace_summary": "No slow traces available yet.",
+        }
+
+    if start or end:
+        traces = [
+            trace
+            for trace in traces
+            if (start is None or parse_timestamp(trace["timestamp"]) >= parse_timestamp(start))
+            and (end is None or parse_timestamp(trace["timestamp"]) <= parse_timestamp(end))
+        ]
+
+    if not traces:
+        return {
+            "slow_trace_count": 0,
+            "suspicious_span_names": [],
+            "hot_services": [],
+            "primary_window": "not enough trace data yet",
+            "trace_summary": "No slow traces aligned with the focused incident window yet.",
         }
 
     slow_traces = [trace for trace in traces if trace["duration_ms"] >= 1500]

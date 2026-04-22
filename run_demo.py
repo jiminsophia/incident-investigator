@@ -119,6 +119,22 @@ def summarize_findings(findings: dict[str, Any]) -> list[str]:
             f"({metric_summary.get('baseline_latency_ms', '?')} -> {metric_summary.get('max_latency_ms', '?')} ms)"
         )
 
+    reduction_summary = findings.get("reduction_summary")
+    if reduction_summary:
+        lines.append(
+            "raw_events="
+            f"{reduction_summary.get('raw_event_count', '?')} "
+            f"(baseline={reduction_summary.get('baseline_event_count', '?')})"
+        )
+
+    severity_summary = findings.get("severity_summary") or findings.get("focused_severity_summary")
+    if severity_summary:
+        lines.append(
+            "severity="
+            f"{severity_summary.get('severity', 'unknown')} "
+            f"(score={severity_summary.get('incident_score', '?')})"
+        )
+
     log_summary = findings.get("log_summary")
     if log_summary:
         lines.append(
@@ -176,6 +192,10 @@ def summarize_findings(findings: dict[str, Any]) -> list[str]:
     anomalies = findings.get("anomalies")
     if anomalies:
         lines.append(f"anomalies={len(anomalies)}")
+
+    incident_severity = findings.get("incident_severity")
+    if incident_severity:
+        lines.append(f"severity={incident_severity}")
 
     return lines[:5]
 
@@ -483,8 +503,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--execution-backend",
-        choices=["native", "nemo_nat"],
-        default="native",
+        choices=["nemo_nat"],
+        default="nemo_nat",
         help="Select how investigation skills are executed.",
     )
     parser.add_argument(

@@ -19,6 +19,11 @@ class ResultValidator:
         if missing:
             return False, f"Missing expected fields: {', '.join(missing)}."
 
+        if step.skill_name == "Focus Window Refinement":
+            focused_window = result.findings["focused_window"]
+            if not focused_window.get("start") or not focused_window.get("end"):
+                return False, "Focused window refinement did not produce a usable incident window."
+
         if step.skill_name == "Trace Investigation":
             trace_summary = result.findings["trace_summary"]
             if state.context.get("anomalies") and trace_summary["slow_trace_count"] == 0:

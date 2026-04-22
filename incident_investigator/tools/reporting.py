@@ -20,13 +20,15 @@ def build_final_report(metadata: dict, outputs: list["AgentOutput"]) -> dict:
 
     anomalies = monitor["anomalies"]
     top_hypothesis = root_cause["hypotheses"][0]
-    impacted_service = monitor["metric_summary"]["highest_latency_service"]
+    metric_summary = monitor.get("focused_metric_summary", monitor["metric_summary"])
+    severity_summary = monitor.get("focused_severity_summary", monitor.get("severity_summary", {}))
+    impacted_service = metric_summary["highest_latency_service"]
 
     return {
         "anomaly_summary": {
             "headline": metadata["title"],
             "summary": metadata["summary"],
-            "severity": metadata["severity"],
+            "severity": severity_summary.get("severity", monitor.get("incident_severity", metadata["severity"])),
             "impacted_service": impacted_service,
             "time_window": investigator["primary_window"],
         },

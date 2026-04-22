@@ -45,9 +45,19 @@ class ToolCallingInvestigator:
                 description="Read the current investigation state, known findings, evidence gaps, and retry counts.",
             ),
             ToolBinding(
+                tool_name="run_observability_reduction",
+                skill_name="Observability Reduction",
+                description="Skill: convert raw events into logs, metrics, traces, user-flow summaries, and computed severity.",
+            ),
+            ToolBinding(
                 tool_name="run_signal_monitor",
                 skill_name="Signal Monitor",
                 description="Skill: summarize metrics, logs, and user behavior, then detect anomalies.",
+            ),
+            ToolBinding(
+                tool_name="run_focus_window_refinement",
+                skill_name="Focus Window Refinement",
+                description="Skill: choose the most incident-dense time slice and recompute focused summaries.",
             ),
             ToolBinding(
                 tool_name="run_trace_investigation",
@@ -261,10 +271,21 @@ class ToolCallingInvestigator:
 
     def _state_snapshot(self, state: ExecutionState) -> dict[str, Any]:
         keys_of_interest = [
+            "reduction_summary",
+            "request_path_summary",
+            "severity_summary",
+            "incident_severity",
+            "severity_hint",
             "metric_summary",
             "log_summary",
             "user_summary",
             "anomalies",
+            "focused_window",
+            "focused_metric_summary",
+            "focused_log_summary",
+            "focused_user_summary",
+            "focused_request_path_summary",
+            "focused_severity_summary",
             "trace_summary",
             "relevant_artifacts",
             "suspicious_components",

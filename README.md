@@ -6,7 +6,8 @@ Skill-based incident investigation demo for operational anomalies.
 
 This project simulates an operations-aware AI system that:
 
-- monitors logs, metrics, traces, and user events
+- ingests rough raw observability events
+- derives logs, service metrics, traces, and user journey summaries
 - detects unusual behavior
 - investigates suspicious components and time windows
 - ranks root-cause hypotheses
@@ -53,7 +54,9 @@ It is intentionally built as an incident investigation workflow, not a generic c
 │                           ▼                                          │
 │  ┌────────────────────────────────────────────────────────────────┐  │
 │  │                     Investigation Skills                       │  │
+│  │  - Observability Reduction                                    │  │
 │  │  - Signal Monitor                                             │  │
+│  │  - Focus Window Refinement                                    │  │
 │  │  - Trace Investigation                                        │  │
 │  │  - Artifact Analysis                                          │  │
 │  │  - Component Correlation                                      │  │
@@ -69,14 +72,14 @@ It is intentionally built as an incident investigation workflow, not a generic c
 │                                                                      │
 │  load_scenario_bundle()                                              │
 │  - reads incident manifest                                           │
-│  - slices shared raw logs / traces / metrics / user events           │
+│  - slices shared raw event streams into baseline/current windows      │
+│  - derives logs / metrics / journey impact from events                │
+│  - loads and slices shared distributed traces                         │
 │  - assembles the runtime investigation bundle                        │
 │                                                                      │
 │  data/incidents/*.json                                               │
 │  data/raw/logs/*.jsonl                                               │
 │  data/raw/traces/*.jsonl                                             │
-│  data/raw/metrics/*.json                                             │
-│  data/raw/user_events/*.json                                         │
 │  data/raw/artifacts/*.json                                           │
 └──────────────────────────────────────────────────────────────────────┘
                            │
@@ -147,7 +150,9 @@ incident-investigator/
     │   │   └── SkillRegistry
     │   └── modules.py
     │       └── concrete skills
+    │           - ObservabilityReductionSkill
     │           - SignalMonitorSkill
+    │           - FocusWindowRefinementSkill
     │           - TraceInvestigationSkill
     │           - ArtifactAnalysisSkill
     │           - ComponentCorrelationSkill
@@ -161,6 +166,9 @@ incident-investigator/
     │   │       - list_scenarios()
     │   │       - load_scenario_bundle()
     │   │       - build_replay_bundle()
+    │   ├── observability.py
+    │   │   └── raw event reduction into logs / metrics / journeys
+    │   ├── severity.py
     │   ├── metrics.py
     │   ├── log_parser.py
     │   ├── traces.py
@@ -172,8 +180,6 @@ incident-investigator/
         ├── raw/
         │   ├── logs/application_logs.jsonl
         │   ├── traces/distributed_traces.jsonl
-        │   ├── metrics/service_metrics.json
-        │   ├── user_events/conversion_snapshots.json
         │   └── artifacts/catalog.json
         │
         └── incidents/
@@ -195,14 +201,34 @@ The demo now uses a more real-data-like structure:
 Each incident manifest defines:
 
 - the incident metadata shown in the UI
-- the time window, services, components, and flows to pull from raw logs/traces/metrics/user events
+- a baseline window and a current investigation window
+- the services and flows that matter for reduction
 - optional replay stages that progressively widen the slice to simulate the investigation over time
 
-This means the app no longer assumes that logs or user events are pre-organized into per-incident folders. The loader assembles the investigation bundle at runtime from shared raw datasets, and those raw datasets intentionally include healthy traffic and unrelated noise alongside the incident signals.
+The raw event log intentionally starts rough. It contains request and journey events such as:
+
+- `timestamp`
+- `request_id`, `trace_id`, `session_id`
+- `user_id`
+- `entrypoint`
+- `service`, `operation`, `upstream`, `downstream`
+- `status_code`, `exception`, `timeout`, `retry_count`
+- `latency_ms`
+- `event_type`, `flow`, `outcome`, `last_completed_step`
+
+From those events, the reduction layer derives:
+
+- normalized `INFO/WARN/ERROR` log records
+- service-level `baseline_p95_ms`, `current_p95_ms`, and `error_rate_pct`
+- grouped traces from shared `trace_id`
+- user conversion/drop-off summaries by flow
+- computed incident severity used by the investigation report
 
 ## Skill-based flow
 
+- `Observability Reduction`: converts rough raw events into investigation-ready logs, metrics, and user-flow summaries
 - `Signal Monitor`: summarizes metrics, logs, and user impact, then detects anomalies
+- `Focus Window Refinement`: finds the most incident-dense time slice before deeper investigation
 - `Trace Investigation`: inspects slow traces and narrows the primary incident window
 - `Artifact Analysis`: finds related code/config artifacts for suspected services
 - `Component Correlation`: combines outputs into ranked suspicious components
@@ -210,6 +236,12 @@ This means the app no longer assumes that logs or user events are pre-organized 
 - `Evidence Review`: checks whether the current evidence is strong enough
 - `Action Planning`: recommends mitigations and next actions
 - `CoordinatorAgent`: plans which skill to run next and retries weak steps automatically
+
+This gives the investigation a hybrid loop:
+
+- deterministic reducers compress noisy raw events into stable signals
+- the planner or LLM chooses when to derive, correlate, retry, and synthesize
+- the final report is grounded in computed evidence rather than pre-authored metrics snapshots
 
 ## Run
 
