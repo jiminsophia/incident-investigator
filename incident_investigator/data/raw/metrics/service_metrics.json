@@ -1,0 +1,98 @@
+[
+  {
+    "timestamp": "2026-04-21T09:29:00Z",
+    "services": [
+      {"service": "search-api", "baseline_p95_ms": 210, "current_p95_ms": 220, "error_rate_pct": 0.6},
+      {"service": "ranking-service", "baseline_p95_ms": 140, "current_p95_ms": 150, "error_rate_pct": 0.4},
+      {"service": "frontend-web", "baseline_p95_ms": 110, "current_p95_ms": 120, "error_rate_pct": 0.2},
+      {"service": "checkout-api", "baseline_p95_ms": 340, "current_p95_ms": 350, "error_rate_pct": 0.4},
+      {"service": "payment-service", "baseline_p95_ms": 220, "current_p95_ms": 230, "error_rate_pct": 0.5},
+      {"service": "cart-service", "baseline_p95_ms": 180, "current_p95_ms": 190, "error_rate_pct": 0.3},
+      {"service": "notifications-service", "baseline_p95_ms": 90, "current_p95_ms": 92, "error_rate_pct": 0.1}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T09:34:00Z",
+    "services": [
+      {"service": "search-api", "baseline_p95_ms": 210, "current_p95_ms": 910, "error_rate_pct": 5.4},
+      {"service": "ranking-service", "baseline_p95_ms": 140, "current_p95_ms": 710, "error_rate_pct": 4.8},
+      {"service": "frontend-web", "baseline_p95_ms": 110, "current_p95_ms": 220, "error_rate_pct": 0.6},
+      {"service": "checkout-api", "baseline_p95_ms": 340, "current_p95_ms": 360, "error_rate_pct": 0.5},
+      {"service": "payment-service", "baseline_p95_ms": 220, "current_p95_ms": 240, "error_rate_pct": 0.7},
+      {"service": "cart-service", "baseline_p95_ms": 180, "current_p95_ms": 195, "error_rate_pct": 0.3},
+      {"service": "notifications-service", "baseline_p95_ms": 90, "current_p95_ms": 91, "error_rate_pct": 0.1}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T09:36:30Z",
+    "services": [
+      {"service": "search-api", "baseline_p95_ms": 210, "current_p95_ms": 1220, "error_rate_pct": 8.2},
+      {"service": "ranking-service", "baseline_p95_ms": 140, "current_p95_ms": 940, "error_rate_pct": 6.4},
+      {"service": "frontend-web", "baseline_p95_ms": 110, "current_p95_ms": 260, "error_rate_pct": 0.8},
+      {"service": "checkout-api", "baseline_p95_ms": 340, "current_p95_ms": 365, "error_rate_pct": 0.4},
+      {"service": "payment-service", "baseline_p95_ms": 220, "current_p95_ms": 245, "error_rate_pct": 0.5},
+      {"service": "cart-service", "baseline_p95_ms": 180, "current_p95_ms": 200, "error_rate_pct": 0.3},
+      {"service": "notifications-service", "baseline_p95_ms": 90, "current_p95_ms": 93, "error_rate_pct": 0.1}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T14:04:00Z",
+    "services": [
+      {"service": "checkout-api", "baseline_p95_ms": 340, "current_p95_ms": 360, "error_rate_pct": 0.4},
+      {"service": "payment-service", "baseline_p95_ms": 220, "current_p95_ms": 240, "error_rate_pct": 0.5},
+      {"service": "cart-service", "baseline_p95_ms": 180, "current_p95_ms": 190, "error_rate_pct": 0.3},
+      {"service": "search-api", "baseline_p95_ms": 210, "current_p95_ms": 230, "error_rate_pct": 0.7},
+      {"service": "ranking-service", "baseline_p95_ms": 140, "current_p95_ms": 160, "error_rate_pct": 0.5},
+      {"service": "frontend-web", "baseline_p95_ms": 110, "current_p95_ms": 125, "error_rate_pct": 0.2},
+      {"service": "notifications-service", "baseline_p95_ms": 90, "current_p95_ms": 94, "error_rate_pct": 0.1}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T14:05:25Z",
+    "services": [
+      {"service": "checkout-api", "baseline_p95_ms": 340, "current_p95_ms": 680, "error_rate_pct": 1.3},
+      {"service": "payment-service", "baseline_p95_ms": 220, "current_p95_ms": 610, "error_rate_pct": 1.8},
+      {"service": "cart-service", "baseline_p95_ms": 180, "current_p95_ms": 220, "error_rate_pct": 0.5},
+      {"service": "search-api", "baseline_p95_ms": 210, "current_p95_ms": 235, "error_rate_pct": 0.6},
+      {"service": "ranking-service", "baseline_p95_ms": 140, "current_p95_ms": 165, "error_rate_pct": 0.4},
+      {"service": "frontend-web", "baseline_p95_ms": 110, "current_p95_ms": 130, "error_rate_pct": 0.2},
+      {"service": "notifications-service", "baseline_p95_ms": 90, "current_p95_ms": 95, "error_rate_pct": 0.1}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T14:06:55Z",
+    "services": [
+      {"service": "checkout-api", "baseline_p95_ms": 340, "current_p95_ms": 1140, "error_rate_pct": 4.1},
+      {"service": "payment-service", "baseline_p95_ms": 220, "current_p95_ms": 980, "error_rate_pct": 6.8},
+      {"service": "cart-service", "baseline_p95_ms": 180, "current_p95_ms": 310, "error_rate_pct": 1.1},
+      {"service": "search-api", "baseline_p95_ms": 210, "current_p95_ms": 240, "error_rate_pct": 0.5},
+      {"service": "ranking-service", "baseline_p95_ms": 140, "current_p95_ms": 170, "error_rate_pct": 0.4},
+      {"service": "frontend-web", "baseline_p95_ms": 110, "current_p95_ms": 132, "error_rate_pct": 0.2},
+      {"service": "notifications-service", "baseline_p95_ms": 90, "current_p95_ms": 95, "error_rate_pct": 0.1}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T14:08:20Z",
+    "services": [
+      {"service": "checkout-api", "baseline_p95_ms": 340, "current_p95_ms": 1680, "error_rate_pct": 6.2},
+      {"service": "payment-service", "baseline_p95_ms": 220, "current_p95_ms": 1280, "error_rate_pct": 9.6},
+      {"service": "cart-service", "baseline_p95_ms": 180, "current_p95_ms": 430, "error_rate_pct": 1.7},
+      {"service": "search-api", "baseline_p95_ms": 210, "current_p95_ms": 245, "error_rate_pct": 0.5},
+      {"service": "ranking-service", "baseline_p95_ms": 140, "current_p95_ms": 175, "error_rate_pct": 0.4},
+      {"service": "frontend-web", "baseline_p95_ms": 110, "current_p95_ms": 138, "error_rate_pct": 0.2},
+      {"service": "notifications-service", "baseline_p95_ms": 90, "current_p95_ms": 96, "error_rate_pct": 0.1}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T14:10:00Z",
+    "services": [
+      {"service": "checkout-api", "baseline_p95_ms": 340, "current_p95_ms": 1920, "error_rate_pct": 7.8},
+      {"service": "payment-service", "baseline_p95_ms": 220, "current_p95_ms": 1410, "error_rate_pct": 12.1},
+      {"service": "cart-service", "baseline_p95_ms": 180, "current_p95_ms": 490, "error_rate_pct": 1.9},
+      {"service": "search-api", "baseline_p95_ms": 210, "current_p95_ms": 250, "error_rate_pct": 0.5},
+      {"service": "ranking-service", "baseline_p95_ms": 140, "current_p95_ms": 180, "error_rate_pct": 0.4},
+      {"service": "frontend-web", "baseline_p95_ms": 110, "current_p95_ms": 140, "error_rate_pct": 0.2},
+      {"service": "notifications-service", "baseline_p95_ms": 90, "current_p95_ms": 96, "error_rate_pct": 0.1}
+    ]
+  }
+]

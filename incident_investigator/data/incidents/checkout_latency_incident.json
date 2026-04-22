@@ -1,0 +1,112 @@
+{
+  "metadata": {
+    "title": "Checkout latency and payment failure spike",
+    "summary": "During the 14:05-14:20 window, checkout latency surged, payment retries increased, and checkout conversion fell sharply.",
+    "severity": "SEV-1"
+  },
+  "filters": {
+    "start": "2026-04-21T14:05:00Z",
+    "end": "2026-04-21T14:20:00Z",
+    "metric_snapshot_at": "2026-04-21T14:10:00Z",
+    "user_snapshot_at": "2026-04-21T14:10:00Z",
+    "components": [
+      "checkout-api",
+      "payment-service",
+      "cart-service",
+      "frontend-web",
+      "edge-gateway",
+      "redis-cache"
+    ],
+    "services": [
+      "checkout-api",
+      "payment-service",
+      "cart-service",
+      "redis-cache"
+    ],
+    "flows": [
+      "checkout_completion",
+      "cart_to_checkout"
+    ],
+    "artifact_domains": [
+      "checkout",
+      "payments",
+      "platform"
+    ],
+    "artifact_keywords": [
+      "checkout-api",
+      "payment-service",
+      "redis-cache",
+      "reserve_payment_session",
+      "authorize_payment",
+      "timeout",
+      "retry"
+    ]
+  },
+  "timeline": [
+    {
+      "elapsed_sec": 0,
+      "label": "Healthy baseline",
+      "severity_hint": "Normal",
+      "summary": "Traffic is healthy. Checkout latency and conversion are within normal range.",
+      "operator_note": "Open with the calm baseline so viewers can see the system before the incident emerges.",
+      "slice": {
+        "start": "2026-04-21T14:00:00Z",
+        "end": "2026-04-21T14:05:00Z",
+        "metric_snapshot_at": "2026-04-21T14:04:00Z",
+        "user_snapshot_at": "2026-04-21T14:04:00Z"
+      }
+    },
+    {
+      "elapsed_sec": 25,
+      "label": "Latency warning",
+      "severity_hint": "Watch",
+      "summary": "The monitor starts seeing elevated checkout and payment latency, but user impact is still limited.",
+      "operator_note": "Narrate that the Monitor Agent is the first to notice the anomaly trend.",
+      "slice": {
+        "start": "2026-04-21T14:05:00Z",
+        "end": "2026-04-21T14:05:59Z",
+        "metric_snapshot_at": "2026-04-21T14:05:25Z",
+        "user_snapshot_at": "2026-04-21T14:05:25Z"
+      }
+    },
+    {
+      "elapsed_sec": 50,
+      "label": "Error spike",
+      "severity_hint": "Elevated",
+      "summary": "Timeout errors begin clustering in payment-service while latency worsens across the checkout path.",
+      "operator_note": "Switch to the agent trace panel here and show evidence being handed from Monitor to Investigator.",
+      "slice": {
+        "start": "2026-04-21T14:05:00Z",
+        "end": "2026-04-21T14:07:05Z",
+        "metric_snapshot_at": "2026-04-21T14:06:55Z",
+        "user_snapshot_at": "2026-04-21T14:06:55Z"
+      }
+    },
+    {
+      "elapsed_sec": 80,
+      "label": "Cross-signal incident",
+      "severity_hint": "High",
+      "summary": "Now the system sees a multi-signal incident: latency, errors, slow traces, and checkout drop-off all align.",
+      "operator_note": "This is a good point to explain why this is not just a log parser; it correlates ops and user impact.",
+      "slice": {
+        "start": "2026-04-21T14:05:00Z",
+        "end": "2026-04-21T14:08:25Z",
+        "metric_snapshot_at": "2026-04-21T14:08:20Z",
+        "user_snapshot_at": "2026-04-21T14:08:20Z"
+      }
+    },
+    {
+      "elapsed_sec": 110,
+      "label": "Root-cause focus",
+      "severity_hint": "SEV-1",
+      "summary": "The investigation narrows to Redis-backed payment session handling and recent retry/config changes.",
+      "operator_note": "Pause on the hypotheses and inspection targets so the audience sees the investigation narrowing.",
+      "slice": {
+        "start": "2026-04-21T14:05:00Z",
+        "end": "2026-04-21T14:10:00Z",
+        "metric_snapshot_at": "2026-04-21T14:10:00Z",
+        "user_snapshot_at": "2026-04-21T14:10:00Z"
+      }
+    }
+  ]
+}

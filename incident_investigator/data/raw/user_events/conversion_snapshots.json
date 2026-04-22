@@ -1,0 +1,82 @@
+[
+  {
+    "timestamp": "2026-04-21T09:29:00Z",
+    "flows": [
+      {"flow": "search_results_to_click", "baseline_conversion_rate": 0.38, "current_conversion_rate": 0.37, "dropoff_rate_delta": 0.01},
+      {"flow": "search_to_add_to_cart", "baseline_conversion_rate": 0.14, "current_conversion_rate": 0.14, "dropoff_rate_delta": 0.0},
+      {"flow": "checkout_completion", "baseline_conversion_rate": 0.64, "current_conversion_rate": 0.63, "dropoff_rate_delta": 0.01},
+      {"flow": "cart_to_checkout", "baseline_conversion_rate": 0.72, "current_conversion_rate": 0.72, "dropoff_rate_delta": 0.0},
+      {"flow": "signup_completion", "baseline_conversion_rate": 0.22, "current_conversion_rate": 0.22, "dropoff_rate_delta": 0.0}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T09:34:00Z",
+    "flows": [
+      {"flow": "search_results_to_click", "baseline_conversion_rate": 0.38, "current_conversion_rate": 0.24, "dropoff_rate_delta": 0.14},
+      {"flow": "search_to_add_to_cart", "baseline_conversion_rate": 0.14, "current_conversion_rate": 0.1, "dropoff_rate_delta": 0.04},
+      {"flow": "checkout_completion", "baseline_conversion_rate": 0.64, "current_conversion_rate": 0.63, "dropoff_rate_delta": 0.01},
+      {"flow": "cart_to_checkout", "baseline_conversion_rate": 0.72, "current_conversion_rate": 0.72, "dropoff_rate_delta": 0.0},
+      {"flow": "signup_completion", "baseline_conversion_rate": 0.22, "current_conversion_rate": 0.22, "dropoff_rate_delta": 0.0}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T09:36:30Z",
+    "flows": [
+      {"flow": "search_results_to_click", "baseline_conversion_rate": 0.38, "current_conversion_rate": 0.19, "dropoff_rate_delta": 0.19},
+      {"flow": "search_to_add_to_cart", "baseline_conversion_rate": 0.14, "current_conversion_rate": 0.08, "dropoff_rate_delta": 0.06},
+      {"flow": "checkout_completion", "baseline_conversion_rate": 0.64, "current_conversion_rate": 0.63, "dropoff_rate_delta": 0.01},
+      {"flow": "cart_to_checkout", "baseline_conversion_rate": 0.72, "current_conversion_rate": 0.72, "dropoff_rate_delta": 0.0},
+      {"flow": "signup_completion", "baseline_conversion_rate": 0.22, "current_conversion_rate": 0.21, "dropoff_rate_delta": 0.01}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T14:04:00Z",
+    "flows": [
+      {"flow": "checkout_completion", "baseline_conversion_rate": 0.64, "current_conversion_rate": 0.63, "dropoff_rate_delta": 0.01},
+      {"flow": "cart_to_checkout", "baseline_conversion_rate": 0.72, "current_conversion_rate": 0.72, "dropoff_rate_delta": 0.0},
+      {"flow": "search_results_to_click", "baseline_conversion_rate": 0.38, "current_conversion_rate": 0.37, "dropoff_rate_delta": 0.01},
+      {"flow": "search_to_add_to_cart", "baseline_conversion_rate": 0.14, "current_conversion_rate": 0.14, "dropoff_rate_delta": 0.0},
+      {"flow": "signup_completion", "baseline_conversion_rate": 0.22, "current_conversion_rate": 0.22, "dropoff_rate_delta": 0.0}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T14:05:25Z",
+    "flows": [
+      {"flow": "checkout_completion", "baseline_conversion_rate": 0.64, "current_conversion_rate": 0.61, "dropoff_rate_delta": 0.03},
+      {"flow": "cart_to_checkout", "baseline_conversion_rate": 0.72, "current_conversion_rate": 0.71, "dropoff_rate_delta": 0.01},
+      {"flow": "search_results_to_click", "baseline_conversion_rate": 0.38, "current_conversion_rate": 0.37, "dropoff_rate_delta": 0.01},
+      {"flow": "search_to_add_to_cart", "baseline_conversion_rate": 0.14, "current_conversion_rate": 0.14, "dropoff_rate_delta": 0.0},
+      {"flow": "signup_completion", "baseline_conversion_rate": 0.22, "current_conversion_rate": 0.22, "dropoff_rate_delta": 0.0}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T14:06:55Z",
+    "flows": [
+      {"flow": "checkout_completion", "baseline_conversion_rate": 0.64, "current_conversion_rate": 0.56, "dropoff_rate_delta": 0.08},
+      {"flow": "cart_to_checkout", "baseline_conversion_rate": 0.72, "current_conversion_rate": 0.7, "dropoff_rate_delta": 0.02},
+      {"flow": "search_results_to_click", "baseline_conversion_rate": 0.38, "current_conversion_rate": 0.37, "dropoff_rate_delta": 0.01},
+      {"flow": "search_to_add_to_cart", "baseline_conversion_rate": 0.14, "current_conversion_rate": 0.14, "dropoff_rate_delta": 0.0},
+      {"flow": "signup_completion", "baseline_conversion_rate": 0.22, "current_conversion_rate": 0.22, "dropoff_rate_delta": 0.0}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T14:08:20Z",
+    "flows": [
+      {"flow": "checkout_completion", "baseline_conversion_rate": 0.64, "current_conversion_rate": 0.47, "dropoff_rate_delta": 0.17},
+      {"flow": "cart_to_checkout", "baseline_conversion_rate": 0.72, "current_conversion_rate": 0.68, "dropoff_rate_delta": 0.04},
+      {"flow": "search_results_to_click", "baseline_conversion_rate": 0.38, "current_conversion_rate": 0.37, "dropoff_rate_delta": 0.01},
+      {"flow": "search_to_add_to_cart", "baseline_conversion_rate": 0.14, "current_conversion_rate": 0.14, "dropoff_rate_delta": 0.0},
+      {"flow": "signup_completion", "baseline_conversion_rate": 0.22, "current_conversion_rate": 0.22, "dropoff_rate_delta": 0.0}
+    ]
+  },
+  {
+    "timestamp": "2026-04-21T14:10:00Z",
+    "flows": [
+      {"flow": "checkout_completion", "baseline_conversion_rate": 0.64, "current_conversion_rate": 0.41, "dropoff_rate_delta": 0.23},
+      {"flow": "cart_to_checkout", "baseline_conversion_rate": 0.72, "current_conversion_rate": 0.67, "dropoff_rate_delta": 0.05},
+      {"flow": "search_results_to_click", "baseline_conversion_rate": 0.38, "current_conversion_rate": 0.37, "dropoff_rate_delta": 0.01},
+      {"flow": "search_to_add_to_cart", "baseline_conversion_rate": 0.14, "current_conversion_rate": 0.14, "dropoff_rate_delta": 0.0},
+      {"flow": "signup_completion", "baseline_conversion_rate": 0.22, "current_conversion_rate": 0.21, "dropoff_rate_delta": 0.01}
+    ]
+  }
+]

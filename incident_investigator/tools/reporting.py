@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from incident_investigator.agents.base import AgentOutput
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from incident_investigator.agents.base import AgentOutput
 
 
 def format_agent_detail(role: str, bullet_points: list[str]) -> str:
@@ -9,7 +12,7 @@ def format_agent_detail(role: str, bullet_points: list[str]) -> str:
     return "\n".join(lines)
 
 
-def build_final_report(metadata: dict, outputs: list[AgentOutput]) -> dict:
+def build_final_report(metadata: dict, outputs: list["AgentOutput"]) -> dict:
     monitor = outputs[0].findings
     investigator = outputs[1].findings
     root_cause = outputs[2].findings
@@ -42,4 +45,3 @@ def build_final_report(metadata: dict, outputs: list[AgentOutput]) -> dict:
             for output in outputs
         ],
     }
-

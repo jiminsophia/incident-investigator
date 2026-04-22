@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Payment Redis session config",
+    "location": "services/payment/config/redis.yaml",
+    "summary": "Redis pool size, command timeout, and retry settings for payment session reservations.",
+    "keywords": ["payment-service", "redis-cache", "reserve_payment_session", "timeout"],
+    "domains": ["payments", "platform"]
+  },
+  {
+    "title": "Checkout API timeout policy",
+    "location": "services/checkout-api/config/timeouts.yaml",
+    "summary": "Gateway timeout budget and retry behavior for payment-service requests.",
+    "keywords": ["checkout-api", "payment-service", "deadline", "timeout"],
+    "domains": ["checkout", "payments"]
+  },
+  {
+    "title": "Feature flag rollout for payment retry path",
+    "location": "ops/flags/payment_retry_experiment.json",
+    "summary": "Rollout percentage and fallback policy for a payment retry experiment enabled shortly before the incident.",
+    "keywords": ["payment-service", "feature_flag", "authorize_payment", "retry"],
+    "domains": ["payments", "checkout"]
+  },
+  {
+    "title": "Checkout tracing dashboard notes",
+    "location": "docs/runbooks/checkout-latency.md",
+    "summary": "Runbook for investigating checkout latency, Redis saturation, and downstream payment failures.",
+    "keywords": ["checkout-api", "redis-cache", "runbook", "latency"],
+    "domains": ["checkout", "platform"]
+  },
+  {
+    "title": "Cart service circuit breaker settings",
+    "location": "services/cart/config/circuit_breaker.yaml",
+    "summary": "Inventory reservation timeout and retry caps for cart-to-checkout traffic.",
+    "keywords": ["cart-service", "reserve_inventory", "timeout", "retry"],
+    "domains": ["checkout"]
+  },
+  {
+    "title": "Search API rerank timeout settings",
+    "location": "services/search-api/config/rerank.yaml",
+    "summary": "Timeout and fallback behavior for embedding retrieval and reranking.",
+    "keywords": ["search-api", "fetch_embedding_vectors", "timeout", "rerank_top_k"],
+    "domains": ["search", "ranking"]
+  },
+  {
+    "title": "Ranking service rollout manifest",
+    "location": "deploy/ranking-service/canary.yaml",
+    "summary": "Canary rollout manifest for a new ranking model endpoint introduced before the regression.",
+    "keywords": ["ranking-service", "model-gateway", "score_candidates", "rollout"],
+    "domains": ["search", "ranking"]
+  },
+  {
+    "title": "Search quality runbook",
+    "location": "docs/runbooks/search-regressions.md",
+    "summary": "Guidance for tracing search regressions caused by model latency, invalid output vectors, or bad canary settings.",
+    "keywords": ["search-api", "ranking-service", "runbook", "invalid score vector"],
+    "domains": ["search", "ranking"]
+  },
+  {
+    "title": "Frontend search result cache policy",
+    "location": "frontend/search/config/cache_policy.json",
+    "summary": "Cache hints and stale-while-revalidate settings for rendering search results.",
+    "keywords": ["frontend-web", "search", "cache", "render"],
+    "domains": ["frontend", "search"]
+  },
+  {
+    "title": "Notifications digest worker config",
+    "location": "services/notifications/config/digest.yaml",
+    "summary": "Batch size and retry settings for email digest generation.",
+    "keywords": ["notifications-service", "digest", "retry"],
+    "domains": ["notifications"]
+  }
+]

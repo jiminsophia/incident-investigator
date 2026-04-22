@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "title": "Search API regression and user abandonment spike",
+    "summary": "After a rollout around 09:30, search errors and latency increased, while successful search-to-click conversion dropped materially.",
+    "severity": "SEV-2"
+  },
+  "filters": {
+    "start": "2026-04-21T09:30:00Z",
+    "end": "2026-04-21T09:45:00Z",
+    "metric_snapshot_at": "2026-04-21T09:36:30Z",
+    "user_snapshot_at": "2026-04-21T09:36:30Z",
+    "components": [
+      "search-api",
+      "ranking-service",
+      "frontend-web",
+      "model-gateway"
+    ],
+    "services": [
+      "search-api",
+      "ranking-service",
+      "model-gateway",
+      "frontend-web"
+    ],
+    "flows": [
+      "search_results_to_click",
+      "search_to_add_to_cart"
+    ],
+    "artifact_domains": [
+      "search",
+      "ranking",
+      "frontend"
+    ],
+    "artifact_keywords": [
+      "search-api",
+      "ranking-service",
+      "model-gateway",
+      "fetch_embedding_vectors",
+      "rerank_top_k",
+      "score_candidates",
+      "rollout"
+    ]
+  }
+}

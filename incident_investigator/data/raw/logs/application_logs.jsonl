@@ -1,0 +1,27 @@
+{"timestamp":"2026-04-21T09:28:55Z","level":"INFO","component":"search-api","message":"search cache warmed and query routing healthy"}
+{"timestamp":"2026-04-21T09:29:10Z","level":"INFO","component":"ranking-service","message":"canary rollout serving 5 percent of requests"}
+{"timestamp":"2026-04-21T09:30:02Z","level":"INFO","component":"frontend-web","message":"search results rendered with healthy client timing"}
+{"timestamp":"2026-04-21T09:31:18Z","level":"INFO","component":"search-api","message":"query parsed and routed to reranker"}
+{"timestamp":"2026-04-21T09:33:10Z","level":"ERROR","component":"search-api","message":"embedding fetch timeout for rerank model"}
+{"timestamp":"2026-04-21T09:33:19Z","level":"ERROR","component":"search-api","message":"embedding fetch timeout for rerank model"}
+{"timestamp":"2026-04-21T09:34:03Z","level":"INFO","component":"ranking-service","message":"rerank canary handled request with elevated latency"}
+{"timestamp":"2026-04-21T09:34:42Z","level":"WARN","component":"frontend-web","message":"search results render delayed"}
+{"timestamp":"2026-04-21T09:35:12Z","level":"ERROR","component":"ranking-service","message":"model endpoint returned invalid score vector"}
+{"timestamp":"2026-04-21T09:35:20Z","level":"INFO","component":"model-gateway","message":"embedding cache miss recovered from fallback store"}
+{"timestamp":"2026-04-21T09:36:08Z","level":"ERROR","component":"search-api","message":"embedding fetch timeout for rerank model"}
+{"timestamp":"2026-04-21T09:36:40Z","level":"INFO","component":"notifications-service","message":"digest worker healthy"}
+{"timestamp":"2026-04-21T14:00:12Z","level":"INFO","component":"edge-gateway","message":"checkout route healthy at baseline latency"}
+{"timestamp":"2026-04-21T14:02:02Z","level":"INFO","component":"checkout-api","message":"assembled cart and pricing context"}
+{"timestamp":"2026-04-21T14:04:48Z","level":"INFO","component":"payment-service","message":"payment session reservation healthy"}
+{"timestamp":"2026-04-21T14:05:12Z","level":"INFO","component":"cart-service","message":"inventory reservation succeeded"}
+{"timestamp":"2026-04-21T14:05:38Z","level":"INFO","component":"frontend-web","message":"checkout page loaded with healthy dependency fanout"}
+{"timestamp":"2026-04-21T14:06:10Z","level":"ERROR","component":"payment-service","message":"Redis timeout while reserving payment session"}
+{"timestamp":"2026-04-21T14:06:20Z","level":"INFO","component":"checkout-api","message":"retry budget remains within threshold"}
+{"timestamp":"2026-04-21T14:06:42Z","level":"ERROR","component":"payment-service","message":"Redis timeout while reserving payment session"}
+{"timestamp":"2026-04-21T14:07:01Z","level":"ERROR","component":"checkout-api","message":"upstream call exceeded deadline"}
+{"timestamp":"2026-04-21T14:07:22Z","level":"INFO","component":"redis-cache","message":"pool saturation rising but requests still served"}
+{"timestamp":"2026-04-21T14:07:40Z","level":"WARN","component":"cart-service","message":"retrying inventory reservation"}
+{"timestamp":"2026-04-21T14:08:12Z","level":"ERROR","component":"payment-service","message":"Redis timeout while reserving payment session"}
+{"timestamp":"2026-04-21T14:08:30Z","level":"ERROR","component":"payment-service","message":"payment authorization request timed out"}
+{"timestamp":"2026-04-21T14:09:05Z","level":"INFO","component":"edge-gateway","message":"request completed after client-side spinner delay"}
+{"timestamp":"2026-04-21T14:09:44Z","level":"INFO","component":"profile-service","message":"recommendation feed healthy"}
