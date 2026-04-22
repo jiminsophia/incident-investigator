@@ -1,21 +1,19 @@
 # Incident Investigator MVP
 
-Skill-based incident investigation demo for operational anomalies.
+An AI-driven operational anomaly investigation system that transforms raw observability data into actionable root-cause reports.
 
 ## What it is
 
-This project simulates an operations-aware AI system that:
+This project simulates an operations-aware AI agent that investigates system incidents through an iterative, loop-wise process:
 
-- ingests rough raw observability events
-- derives logs, service metrics, traces, and user journey summaries
-- detects unusual behavior
-- investigates suspicious components and time windows
-- ranks root-cause hypotheses
-- recommends mitigations and next actions
-- replans investigation steps when a module returns weak evidence
-- retries fragile steps like trace analysis before falling back to other evidence
+1. **Data Reduction**: Ingests noisy raw observability events and derives structured logs, service metrics, traces, and user journey summaries.
+2. **Iterative Investigation**: An LLM-led agent enters a reasoning loop to:
+    - Detect anomalies and identify bottlenecks (e.g., latency spikes, error bursts).
+    - **Dynamic Scope Refinement**: Adjust search windows and focus on suspicious components based on intermediate findings.
+    - Gather evidence using specialized investigation skills.
+3. **Synthesis**: Ranks root-cause hypotheses and generates a final report with a detailed breakdown of the incident and specific mitigation recommendations.
 
-It is intentionally built as an incident investigation workflow, not a generic code agent.
+It is built as a specialized investigation workflow, ensuring that the final report is grounded in computed evidence rather than generic LLM guessing.
 
 ## Architecture
 
@@ -41,7 +39,6 @@ It is intentionally built as an incident investigation workflow, not a generic c
 │  │  - LLM tool-calling loop                                     │  │
 │  │                                                              │  │
 │  │  Chooses execution backend:                                  │  │
-│  │  - native Python                                             │  │
 │  │  - NeMo Agent Toolkit (nemo_nat)                             │  │
 │  │                                                              │  │
 │  │  Shared runtime state:                                       │  │
@@ -139,8 +136,7 @@ incident-investigator/
     │       └── prompt builders for investigation / hypotheses / actions
     │
     ├── execution.py
-    │   └── Skill execution backends
-    │       - DirectSkillExecutor
+    │   └── Skill execution backend
     │       - NemoNATSkillExecutor
     │
     ├── skills/

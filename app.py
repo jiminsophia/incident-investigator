@@ -86,42 +86,46 @@ def ensure_session_state() -> None:
 
 
 def render_overview() -> None:
-    st.title("Incident Investigator")
-    st.caption(
-        "A multi-agent ops investigation MVP for logs, metrics, traces, and user signals."
-    )
+    st.title("🚨 Incident Investigator")
     st.markdown(
         """
-        This demo treats incidents like an operations problem:
-        anomalies are detected, evidence is gathered, hypotheses are ranked,
-        and recommended actions are produced in a structured report.
+        **AI-Driven Operational Anomaly Investigation**
+        
+        This system analyzes raw user logs and observability signals to identify bottlenecks and errors. 
+        The agent iteratively refines its search scope, analyzes evidence, and produces a structured root-cause report with mitigation steps.
         """
     )
+    st.divider()
 
 
 def render_scenario_preview(bundle: dict) -> None:
-    overview = bundle["metadata"]
-    st.subheader("Scenario")
-    st.write(overview["title"])
-    st.caption(overview["summary"])
+    st.subheader("📦 Scenario Dataset")
+    
+    with st.container():
+        overview = bundle["metadata"]
+        
+        # Display sample data and problem clearly
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("### 📋 Incident Context")
+            st.markdown(f"**Title:** {overview['title']}")
+            st.info(f"**Summary:** {overview['summary']}")
+        
+        with col2:
+            st.markdown("### ⚠️ Problem Statement")
+            st.error(f"**Observed Issue:**\nThe system is detecting an anomaly. The agent needs to analyze the logs to find the bottleneck and explain why the severity is `{bundle.get('incident_severity', overview['severity'])}`.")
 
-    c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric("Raw events", len(bundle.get("raw_events", [])))
-    c2.metric("Baseline events", len(bundle.get("baseline_events", [])))
-    c3.metric("Derived logs", len(bundle["logs"]))
-    c4.metric("Traces", len(bundle["traces"]))
-    c5.metric("Severity", bundle.get("incident_severity", overview["severity"]))
-
+        st.divider()
+        st.markdown("**📊 Observability Snapshot**")
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Raw events", len(bundle.get("raw_events", [])))
+        c2.metric("Derived logs", len(bundle["logs"]))
+        c3.metric("Traces", len(bundle["traces"]))
+        c4.metric("Severity", bundle.get("incident_severity", overview["severity"]))
 
 def render_replay_stage(stage: dict) -> None:
-    st.subheader("Live Replay Stage")
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Elapsed", f"{stage['elapsed_sec']} sec")
-    c2.metric("Phase", stage["label"])
-    c3.metric("Detected severity", stage["severity_hint"])
-    st.caption(stage["summary"])
-    if stage.get("operator_note"):
-        st.info(stage["operator_note"])
+    # Keep for compatibility but simplify
+    st.caption(f"Replay Phase: {stage['label']} | Severity: {stage['severity_hint']}")
 
 
 def render_agent_trace(agent_trace: list[dict]) -> None:
@@ -253,67 +257,66 @@ def render_live_event_feed(
     snapshot_placeholder,
 ) -> None:
     if not events:
-        status_placeholder.markdown('<span class="status-pill">Waiting to start the investigation.</span>', unsafe_allow_html=True)
+        status_placeholder.markdown('<<spanspan class="status-pill">Waiting to start the investigation.</span>', unsafe_allow_html=True)
         return
 
     last_event = events[-1]
     status_placeholder.markdown(
-        f'<span class="status-pill">Current step: {last_event["title"]}</span>',
+        f'<<spanspan class="status-pill">Current step: {last_event["title"]}</span>',
         unsafe_allow_html=True,
     )
     status_placeholder.caption(last_event["detail"])
 
-    with feed_placeholder.container():
-        render_chatbot_timeline(events)
 
-    latest_payload = next(
-        (event["payload"] for event in reversed(events) if event["payload"]),
-        None,
-    )
-    if latest_payload is not None:
-        with snapshot_placeholder.container():
-            st.subheader("Latest Snapshot")
-            st.json(latest_payload)
+    # Removed render_chatbot_timeline(events) to simplify UI
+
 
 
 def render_report(report: dict) -> None:
-    st.subheader("Final Incident Report")
-
+    st.subheader("📋 Final Incident Report")
+    
     summary = report["anomaly_summary"]
-    st.markdown(f"### {summary['headline']}")
-    st.write(summary["summary"])
+    
+    # Highlight the headline as a big banner
+    st.info(f"**Incident:** {summary['headline']}")
+    
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.markdown(f"**Summary**\n\n{summary['summary']}")
+    with col2:
+        st.markdown("**Quick Stats**")
+        st.write(f"🔴 **Severity:** {summary['severity']}")
+        st.write(f"⚙️ **Impacted Service:** {summary['impacted_service']}")
+        st.write(f"🕒 **Window:** {summary['time_window']}")
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Severity", summary["severity"])
-    c2.metric("Impacted service", summary["impacted_service"])
-    c3.metric("Primary window", summary["time_window"])
+    st.divider()
 
-    st.markdown("### Root-Cause Hypotheses")
+    st.markdown("### 🔍 Root-Cause Hypotheses")
     for idx, hypothesis in enumerate(report["root_causes"], start=1):
-        st.markdown(
-            f"""
-            **{idx}. {hypothesis['title']}**  
-            Confidence: `{hypothesis['confidence']}`  
-            Why: {hypothesis['rationale']}
-            """
-        )
-        if hypothesis["evidence"]:
-            st.markdown("Evidence:")
-            for evidence in hypothesis["evidence"]:
-                st.write(f"- {evidence}")
+        with st.expander(f"Hypothesis {idx}: {hypothesis['title']} (Confidence: {hypothesis['confidence']})", expanded=True):
+            st.markdown(f"**Rationale:** {hypothesis['rationale']}")
+            if hypothesis["evidence"]:
+                st.markdown("**Supporting Evidence:**")
+                for evidence in hypothesis["evidence"]:
+                    st.write(f"- {evidence}")
 
-    st.markdown("### Recommended Actions")
-    for action in report["recommended_actions"]:
-        st.write(f"- {action}")
+    st.divider()
 
-    st.markdown("### Supporting Evidence")
-    for evidence in report["supporting_evidence"]:
-        st.write(f"- {evidence}")
-
-    if report["inspection_targets"]:
-        st.markdown("### Code / Config To Inspect")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("### ✅ Recommended Actions")
+        for action in report["recommended_actions"]:
+            st.success(action)
+            
+    with c2:
+        st.markdown("### 🛠️ Technical Inspection Targets")
         for target in report["inspection_targets"]:
-            st.code(target)
+            st.code(target, language="text")
+
+    if report.get("supporting_evidence"):
+        with st.expander("View All Supporting Evidence"):
+            for evidence in report["supporting_evidence"]:
+                st.write(f"- {evidence}")
 
 
 def build_run_signature(
@@ -456,32 +459,16 @@ def handle_llm_stream_event(event: dict) -> bool:
     return True
 
 
-@st.fragment(run_every="200ms")
 def render_investigation_panel() -> None:
     drain_investigation_queue()
 
-    status_placeholder = st.empty()
-    live_feed_placeholder = st.empty()
-    latest_snapshot_placeholder = st.empty()
-    llm_responses_placeholder = st.empty()
-    render_live_event_feed(
-        st.session_state["investigation_events"],
-        status_placeholder,
-        live_feed_placeholder,
-        latest_snapshot_placeholder,
-    )
-    with llm_responses_placeholder.container():
-        render_llm_response_streams(st.session_state["investigation_llm_streams"])
-
     report = st.session_state.get("investigation_report")
     if report:
-        left, right = st.columns([1.4, 1])
-        with left:
-            render_report(report)
-        with right:
-            render_agent_trace(report["agent_trace"])
+        st.divider()
+        render_report(report)
     elif st.session_state["investigation_running"]:
-        st.caption("Investigation is still running. New steps will appear here automatically.")
+        st.info("🕵️ Agent is currently investigating the logs... Please wait for the final report.")
+        st.spinner("Analyzing evidence and synthesizing root cause...")
 
 
 def main() -> None:
@@ -491,33 +478,24 @@ def main() -> None:
     data_root = Path(__file__).parent / "incident_investigator" / "data"
     scenarios = list_scenarios(data_root)
     scenario_options = {item["label"]: item["key"] for item in scenarios}
-
+ 
     with st.sidebar:
         st.header("Demo Controls")
         selected_label = st.selectbox("Choose scenario", list(scenario_options.keys()))
         scenario_key = scenario_options[selected_label]
-        demo_mode = st.radio(
-            "View mode",
-            ["Static incident report", "Replay incident over time"],
-            index=1,
-        )
+        
+        # Simplified sidebar - removed mode selection for cleaner UI
         st.divider()
-        st.subheader("vLLM")
-        execution_backend_label = st.selectbox(
-            "Skill execution backend",
-            ["Native Python", "NeMo Agent Toolkit (NAT)"],
-            index=0,
-        )
-        execution_backend = {
-            "Native Python": "native",
-            "NeMo Agent Toolkit (NAT)": "nemo_nat",
-        }[execution_backend_label]
+        st.subheader("vLLM Configuration")
+        
+        execution_backend = "nemo_nat"
         backend_status = get_execution_backend_status(execution_backend)
         if backend_status.available:
             st.caption(backend_status.detail)
         else:
             st.warning(backend_status.detail)
-        use_vllm = st.checkbox("Use vLLM API", value=False)
+            
+        use_vllm = st.checkbox("Use vLLM API", value=True)
         vllm_base_url = st.text_input(
             "Base URL",
             value="http://localhost:8000/v1",
@@ -525,7 +503,7 @@ def main() -> None:
         )
         vllm_model = st.text_input(
             "Model",
-            value="meta-llama/Llama-3.1-8B-Instruct",
+            value="google/gemma-4-31b-it",
             disabled=not use_vllm,
         )
         vllm_api_key = st.text_input(
@@ -536,25 +514,15 @@ def main() -> None:
         )
         auto_run = st.checkbox("Run investigation immediately", value=True)
         run_clicked = st.button("Run Incident Investigation", type="primary")
-
+ 
     bundle = load_scenario_bundle(data_root, scenario_key)
-
+ 
+    # Removed demo_mode logic to simplify
     active_bundle = bundle
-    stage_index: int | None = None
-    if demo_mode == "Replay incident over time" and bundle.get("timeline"):
-        stage_count = len(bundle["timeline"])
-        stage_index = st.slider(
-            "Replay progress",
-            min_value=0,
-            max_value=stage_count - 1,
-            value=stage_count - 1,
-            format="%d",
-        )
-        active_bundle = build_replay_bundle(bundle, stage_index)
-        render_replay_stage(active_bundle["replay_stage"])
-
+    stage_index = None
+ 
     render_scenario_preview(active_bundle)
-
+ 
     llm_config = None
     if use_vllm and vllm_base_url and vllm_model:
         llm_config = LLMConfig(
@@ -562,23 +530,24 @@ def main() -> None:
             model=vllm_model,
             api_key=vllm_api_key or "EMPTY",
         )
-
+ 
     signature = build_run_signature(
         scenario_key=scenario_key,
         stage_index=stage_index,
-        demo_mode=demo_mode,
+        demo_mode="static",
         execution_backend=execution_backend,
         use_vllm=use_vllm,
         vllm_base_url=vllm_base_url,
         vllm_model=vllm_model,
     )
     if st.session_state["investigation_signature"] != signature:
-        reset_investigation_state()
-        st.session_state["investigation_signature"] = signature
-
+        if not st.session_state["investigation_running"]:
+            reset_investigation_state()
+            st.session_state["investigation_signature"] = signature
+ 
     if run_clicked or (auto_run and not st.session_state["investigation_running"] and st.session_state["investigation_report"] is None):
         start_investigation(active_bundle, llm_config, execution_backend, signature)
-
+ 
     render_investigation_panel()
 
 
