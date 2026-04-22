@@ -1,4 +1,4 @@
-# Incident Investigator MVP
+# Incident Investigator
 
 An AI-driven operational anomaly investigation system that transforms raw observability data into actionable root-cause reports.
 
